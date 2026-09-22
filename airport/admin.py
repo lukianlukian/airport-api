@@ -1,12 +1,13 @@
 from django.contrib import admin
+
 from airport.models import (
-    Airport,
-    Route,
-    AirplaneType,
     Airplane,
+    AirplaneType,
+    Airport,
     Crew,
     Flight,
     Order,
+    Route,
     Ticket,
 )
 

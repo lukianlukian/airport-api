@@ -1,11 +1,22 @@
-from datetime import datetime, timezone
+from datetime import (
+    datetime,
+    timezone,
+)
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from rest_framework.test import APITestCase
 
-from airport.models import Airport, AirplaneType, Airplane, Crew, Route, Flight, Order
+from airport.models import (
+    Airplane,
+    AirplaneType,
+    Airport,
+    Crew,
+    Flight,
+    Order,
+    Route,
+)
 from airport.throttles import OrderCreateThrottle
 
 

@@ -1,24 +1,45 @@
-from django.db.models import Count, F
-from rest_framework import viewsets, mixins
-from rest_framework.permissions import IsAuthenticated
+from django.db.models import (
+    Count,
+    F,
+)
 from django_filters.rest_framework import DjangoFilterBackend
-from airport.filters import FlightFilter, RouteFilter
-from airport.permissions import IsStaffOrReadOnly
-from airport.throttles import OrderCreateThrottle
+from rest_framework import (
+    mixins,
+    viewsets,
+)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
+from airport.filters import (
+    FlightFilter,
+    RouteFilter,
+)
 from airport.models import (
-    Airport, Route, AirplaneType, Airplane, Crew, Flight, Order
+    Airplane,
+    AirplaneType,
+    Airport,
+    Crew,
+    Flight,
+    Order,
+    Route,
 )
+from airport.permissions import IsStaffOrReadOnly
 from airport.serializers import (
-    AirportSerializer,
-    RouteSerializer, RouteListSerializer, RouteDetailSerializer,
+    AirplaneListSerializer,
+    AirplaneSerializer,
     AirplaneTypeSerializer,
-    AirplaneSerializer, AirplaneListSerializer,
+    AirportSerializer,
     CrewSerializer,
-    FlightSerializer, FlightListSerializer, FlightDetailSerializer,
-    OrderSerializer, OrderListSerializer,
+    FlightDetailSerializer,
+    FlightListSerializer,
+    FlightSerializer,
+    OrderListSerializer,
+    OrderSerializer,
+    RouteDetailSerializer,
+    RouteListSerializer,
+    RouteSerializer,
 )
+from airport.throttles import OrderCreateThrottle
 
 
 class AirportViewSet(viewsets.ModelViewSet):

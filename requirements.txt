@@ -32,7 +32,7 @@ pathspec==1.0.4
 pep8-naming==0.13.2
 pillow==12.3.0
 platformdirs==4.9.4
-psycopg==3.3.5
+psycopg[binary]>=3.1.8,<4
 pyaes==1.6.1
 pyasn1==0.6.3
 pycodestyle==2.9.1
@@ -53,3 +53,5 @@ uritemplate==4.2.0
 urllib3==2.7.0
 Werkzeug==3.1.7
 django-filter==26.1
+python-dotenv>=1,<2
+isort==9.0.1
