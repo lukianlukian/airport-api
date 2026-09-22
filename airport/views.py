@@ -1,10 +1,14 @@
 from django.db.models import Count, F
 from rest_framework import viewsets, mixins
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
+from airport.filters import FlightFilter, RouteFilter
+from airport.permissions import IsStaffOrReadOnly
+from airport.throttles import OrderCreateThrottle
 from rest_framework.viewsets import GenericViewSet
 
 from airport.models import (
-    Airport, Route, AirplaneType, Airplane, Crew, Flight, Order, Ticket
+    Airport, Route, AirplaneType, Airplane, Crew, Flight, Order
 )
 from airport.serializers import (
     AirportSerializer,
@@ -20,13 +24,15 @@ from airport.serializers import (
 class AirportViewSet(viewsets.ModelViewSet):
     queryset = Airport.objects.all()
     serializer_class = AirportSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsStaffOrReadOnly,)
 
 
 class RouteViewSet(viewsets.ModelViewSet):
-    queryset = Route.objects.select_related("source", "destination")
+    queryset = Route.objects.select_related("source", "destination").order_by("id")
     serializer_class = RouteSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsStaffOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RouteFilter
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -35,27 +41,17 @@ class RouteViewSet(viewsets.ModelViewSet):
             return RouteDetailSerializer
         return RouteSerializer
 
-    def get_queryset(self):
-        queryset = self.queryset
-        source = self.request.query_params.get("source")
-        destination = self.request.query_params.get("destination")
-        if source:
-            queryset = queryset.filter(source__name__icontains=source)
-        if destination:
-            queryset = queryset.filter(destination__name__icontains=destination)
-        return queryset
-
 
 class AirplaneTypeViewSet(viewsets.ModelViewSet):
-    queryset = AirplaneType.objects.all()
+    queryset = AirplaneType.objects.order_by("id")
     serializer_class = AirplaneTypeSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsStaffOrReadOnly,)
 
 
 class AirplaneViewSet(viewsets.ModelViewSet):
-    queryset = Airplane.objects.select_related("airplane_type")
+    queryset = Airplane.objects.select_related("airplane_type").order_by("id")
     serializer_class = AirplaneSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsStaffOrReadOnly,)
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -64,9 +60,9 @@ class AirplaneViewSet(viewsets.ModelViewSet):
 
 
 class CrewViewSet(viewsets.ModelViewSet):
-    queryset = Crew.objects.all()
+    queryset = Crew.objects.order_by("id")
     serializer_class = CrewSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsStaffOrReadOnly,)
 
 
 class FlightViewSet(viewsets.ModelViewSet):
@@ -77,9 +73,12 @@ class FlightViewSet(viewsets.ModelViewSet):
             tickets_available=F("airplane__rows") * F("airplane__seats_in_row")
             - Count("tickets")
         )
+        .order_by("-departure_time", "id")
     )
     serializer_class = FlightSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsStaffOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = FlightFilter
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -88,24 +87,14 @@ class FlightViewSet(viewsets.ModelViewSet):
             return FlightDetailSerializer
         return FlightSerializer
 
-    def get_queryset(self):
-        queryset = self.queryset
-        source = self.request.query_params.get("source")
-        destination = self.request.query_params.get("destination")
-        date = self.request.query_params.get("date")
-        if source:
-            queryset = queryset.filter(route__source__name__icontains=source)
-        if destination:
-            queryset = queryset.filter(route__destination__name__icontains=destination)
-        if date:
-            queryset = queryset.filter(departure_time__date=date)
-        return queryset
-
 
 class OrderViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, GenericViewSet):
-    queryset = Order.objects.prefetch_related("tickets__flight")
+    queryset = Order.objects.prefetch_related("tickets__flight").order_by("-created_at", "id")
     serializer_class = OrderSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
+
+    def get_throttles(self):
+        return [OrderCreateThrottle()] if self.action == "create" else []
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -113,6 +102,8 @@ class OrderViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, GenericViewSe
         return OrderSerializer
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return self.queryset.none()
         return self.queryset.filter(user=self.request.user)
 
     def perform_create(self, serializer):

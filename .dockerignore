@@ -1,0 +1,16 @@
+.git
+.idea
+.venv
+venv
+**/__pycache__
+**/*.py[cod]
+**/*.sqlite3
+**/*.sqlite3-*
+.env
+.env.*
+.agents
+.codex
+media
+staticfiles
+docs
+schema.yaml
