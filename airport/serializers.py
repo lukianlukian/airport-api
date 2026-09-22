@@ -105,6 +105,12 @@ class TicketSerializer(serializers.ModelSerializer):
             attrs["flight"].airplane,
             serializers.ValidationError,
         )
+        if Ticket.objects.filter(
+            flight=attrs["flight"], row=attrs["row"], seat=attrs["seat"]
+        ).exists():
+            raise serializers.ValidationError(
+                {"seat": "This seat is already taken for this flight."}
+            )
         return attrs
 
 
