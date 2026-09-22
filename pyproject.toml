@@ -1,0 +1,5 @@
+[tool.isort]
+profile = "black"
+line_length = 79
+force_grid_wrap = 2
+known_first_party = ["airport", "airport_service", "user"]

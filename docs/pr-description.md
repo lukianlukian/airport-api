@@ -14,7 +14,7 @@ Authenticated users can list only their own orders.
 - SessionAuthentication and login for Browsable API forms.
 - English README with setup, JWT, and curl examples; database structure and screenshot checklist.
 - Dockerfile and Docker Compose for local development: automatic migrations,
-  persistent SQLite storage, a healthcheck, and a non-root process.
+  persistent PostgreSQL storage, a healthcheck, and a non-root process.
 
 Beyond basic CRUD/JWT, this adds documentation, pagination, declarative filters,
 access control, throttling, Docker support, and regression tests.

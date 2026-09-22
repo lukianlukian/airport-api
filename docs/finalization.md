@@ -80,7 +80,7 @@ If splitting changes into independent commits with `git add -p`, possible titles
 - `fix: support email user creation and protect private orders`
 - `feat: add staff permissions, pagination, filters and order throttling`
 - `docs: add OpenAPI, setup guide and database structure`
-- `build: add Docker Compose setup with persistent SQLite storage`
+- `build: add Docker Compose setup with persistent PostgreSQL storage`
 - `test: cover authentication and airport API access rules`
 
 For the documentation translation alone:
